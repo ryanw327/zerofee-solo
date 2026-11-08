@@ -1,6 +1,6 @@
 # ZeroFee Solo
 
-> **Known safety issue under repair: do not use this preview for mining yet.** Source review found that a stalled telemetry thread can prevent its own missing-reading timeout from running, and startup does not wait for the first valid temperature reading. These are identified control-flow gaps, not a claim of an observed hardware failure. An independent heartbeat watchdog and startup handshake are being developed and tested; no fixed release is available yet.
+> **Thermal-supervision patch published; Windows/hardware validation is still pending. Do not use this preview for mining yet.** This source adds an independent heartbeat watchdog, a first-safe-reading startup handshake, and CLI monitoring to address the identified telemetry control-flow gaps. Synthetic tests pass, but that is not proof of hardware thermal protection or Windows integration. No validated binary release is available.
 
 **Your node. Your GPU. Your whole block reward.**
 

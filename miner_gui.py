@@ -59,6 +59,7 @@ class App:
         self.detail = tk.StringVar(value='Nothing is running. Simulation tests controls without mining.')
         self.metrics = tk.StringVar(value='Hashes searched: -    Accepted blocks: -')
         self.runtime = tk.StringVar(value='Elapsed: -    Remaining: -    Average rate: -')
+        self.last_gpu_value = None
         self.gpu_detail = tk.StringVar(value='GPU core readings appear while mining; hotspot is not monitored. Board watts are not whole-PC power.')
         self.run_for, self.custom_minutes = tk.StringVar(value='20 minutes'), tk.StringVar(value='20')
         self.work_info = tk.StringVar(value='Work target: -    Observed tip changes: 0')
@@ -488,6 +489,7 @@ class App:
                     self.work_info.set(f"Mining height: {value['height']}    Observed tip changes: {value['tip_changes']}")
                 elif kind=='gpu':
                     from gpu_monitor import reading_text
+                    self.last_gpu_value = value
                     self.gpu_detail.set(reading_text(value))
                 elif kind=='safety_stop':
                     self.status.set('Stopping — GPU safety')
@@ -555,6 +557,9 @@ class App:
         except Empty:
             pass
         self.refresh_controls()
+        if isinstance(self.last_gpu_value, dict):
+            from gpu_monitor import reading_text
+            self.gpu_detail.set(reading_text(self.last_gpu_value))
         self.poll_id = self.root.after(150,self.poll)
 
 def main():

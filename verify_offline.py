@@ -12,7 +12,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT=Path(__file__).resolve().parent
-MODULES=['test_builder','test_core_session','test_live','test_managed_core','test_managed_runner',
+MODULES=['test_gpu_watchdog','test_builder','test_core_session','test_live','test_managed_core','test_managed_runner',
     'test_startup','test_startup_lifecycle','test_tip_race','test_performance','test_thermal_safety',
     'test_mining_sessions','test_gui','test_gui_window','test_win_moment','test_win_history',
     'test_optional_tip','test_winning_ui','test_advanced_tuning','test_tuning_benchmark',

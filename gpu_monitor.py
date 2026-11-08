@@ -24,16 +24,18 @@ class ThermalGuard:
         self.policy=policy or ThermalPolicy();self.policy.validate()
         self.missing_since=time.monotonic() if started is None else started
         self.reason=None
+        self.last_valid=None
     def observe(self,value,now):
         if self.reason:return self.reason
         temperature=value.get('temperature_c') if isinstance(value,dict) else None
         valid=type(temperature) in (int,float) and math.isfinite(temperature) and temperature>=0
         if valid:
             self.missing_since=None
+            self.last_valid=now
             if temperature>=self.policy.limit_c:
                 self.reason=f'GPU core temperature {temperature:g}°C reached the {self.policy.limit_c:g}°C stop limit.'
         else:
-            if self.missing_since is None:self.missing_since=now
+            if self.missing_since is None:self.missing_since=self.last_valid if self.last_valid is not None else now
             if now-self.missing_since>=self.policy.missing_grace_seconds:
                 self.reason=f'GPU core temperature readings unavailable for {self.policy.missing_grace_seconds:g} seconds.'
         return self.reason
@@ -69,7 +71,9 @@ def reading_text(value):
         item=value.get(key)
         return f'{item:g}{suffix}' if type(item) in (int,float) and math.isfinite(item) and item>=0 else 'unavailable'
     return ('GPU 0 core: '+number('temperature_c','°C')+' · '+number('board_watts',' W board')+
-        ' · utilization: '+number('utilization_percent','%')+' · hotspot not monitored')
+        ' · utilization: '+number('utilization_percent','%')+' · hotspot not monitored' +
+        (f" · sample age: {max(0, time.monotonic()-value['sample_monotonic']):.1f}s"
+         if type(value.get('sample_monotonic')) in (int,float) and math.isfinite(value['sample_monotonic']) else ''))
 
 class GPUMonitor:
     def __init__(self, events, worker_stop, policy=None, read=None, clock=None):
@@ -79,17 +83,68 @@ class GPUMonitor:
         self.read=read or read_gpu;self.clock=clock or time.monotonic
         self.guard=ThermalGuard(self.policy,self.clock());self.reason=None
         self.stop_event = threading.Event()
+        self._state_lock = threading.Lock()
+        self._last_heartbeat = self.clock()
+        self._closed = False
+        self._started = False
+        self.ready = threading.Event()
+        self.watchdog = threading.Thread(target=self._watchdog_work, name='MinerGPUWatchdog', daemon=True)
         self.thread = threading.Thread(target=self.work, name='MinerGPUReadings', daemon=True)
     def start(self):
-        self.thread.start()
+        with self._state_lock:
+            if self._closed:raise RuntimeError('GPU monitor is closed')
+            if self._started:raise RuntimeError('GPU monitor already started')
+            self._started = True
+            self._last_heartbeat = self.clock()
+            self.guard = ThermalGuard(self.policy, self._last_heartbeat)
+        try:
+            # Start independent deadline supervision before the potentially hung reader.
+            self.watchdog.start()
+            self.thread.start()
+            deadline = time.monotonic()+self.policy.missing_grace_seconds
+            while not self.ready.is_set():
+                if self.worker_stop.is_set() or self.stop_event.is_set() or self.reason:
+                    raise RuntimeError('GPU telemetry startup canceled or failed')
+                if time.monotonic() >= deadline:
+                    self._trip('No valid GPU core temperature before startup deadline.')
+                    raise RuntimeError(self.reason)
+                self.ready.wait(.05)
+            if self.worker_stop.is_set() or self.stop_event.is_set() or self.reason:
+                raise RuntimeError('GPU telemetry startup canceled or failed')
+        except BaseException:
+            if not self.worker_stop.is_set() and not self.stop_event.is_set():
+                self._trip('GPU temperature supervision could not start.')
+            self.stop_event.set()
+            raise
+    def check_heartbeat(self):
+        now = self.clock()
+        with self._state_lock:
+            if self._closed or self.reason or self.stop_event.is_set():return
+            expired = now-self._last_heartbeat >= self.policy.missing_grace_seconds
+        if expired:
+            self._trip('GPU telemetry heartbeat stale; reader or delivery may be stalled.',
+                       heartbeat_deadline=now-self.policy.missing_grace_seconds)
+    def _watchdog_work(self):
+        try:
+            while not self.stop_event.wait(min(.25, self.policy.sample_seconds)):
+                self.check_heartbeat()
+                if self.reason:return
+        except BaseException as exc:
+            self._trip(f'GPU telemetry watchdog failed ({type(exc).__name__}).')
     def work(self):
         try:self._work_loop()
         except BaseException as exc:self._trip(f'GPU core temperature monitor failed ({type(exc).__name__}).')
-    def _trip(self,reason):
-        if self.reason:return
-        self.reason=reason+' Cooperative stop requested; no automatic restart.'
+    def _trip(self,reason,heartbeat_deadline=None):
+        with self._state_lock:
+            if self._closed or self.reason:return
+            if heartbeat_deadline is not None and self._last_heartbeat > heartbeat_deadline:return
+            self.reason=reason+' Cooperative stop requested; no automatic restart.'
         self.worker_stop.set()
-        try:self.events.put(('safety_stop',self.reason))
+        # Safety never waits for UI delivery. Standard Queue.put_nowait is best effort;
+        # custom sinks lacking this contract receive no safety notification.
+        try:
+            publish = getattr(self.events, 'put_nowait', None)
+            if callable(publish):publish(('safety_stop',self.reason))
         except Exception:pass
     def _work_loop(self):
         while not self.stop_event.is_set():
@@ -97,14 +152,29 @@ class GPUMonitor:
                 value = self.read()
             except Exception:
                 value = None
-            self.events.put(('gpu', value))
+            self.check_heartbeat()
+            if self.stop_event.is_set() or self.reason:return
+            if isinstance(value, dict):
+                value = dict(value, sample_monotonic=self.clock())
             reason=self.guard.observe(value,self.clock())
             if reason:
                 self._trip(reason)
                 break
+            self.events.put(('gpu', value))
+            temperature=value.get('temperature_c') if isinstance(value,dict) else None
+            if type(temperature) in (int,float) and math.isfinite(temperature) and temperature>=0:
+                self.ready.set()
+            # Only completed read/guard/delivery progress refreshes the heartbeat.
+            # Never hold this lock while reading, publishing events or waiting.
+            with self._state_lock:
+                self._last_heartbeat = self.clock()
             if self.stop_event.wait(self.policy.sample_seconds):
                 break
     def close(self):
+        with self._state_lock:
+            self._closed = True
         self.stop_event.set()
-        if self.thread.is_alive():
-            self.thread.join(3)
+        deadline = time.monotonic()+3
+        for thread in (self.thread, self.watchdog):
+            if thread.is_alive() and thread is not threading.current_thread():
+                thread.join(max(0, deadline-time.monotonic()))

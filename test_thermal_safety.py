@@ -37,8 +37,8 @@ class ThermalTests(unittest.TestCase):
         self.assertIsNone(guard.observe(None,10))
         self.assertIsNone(guard.observe({'temperature_c':50},14))
         self.assertIsNone(guard.observe(None,20))
-        self.assertIsNone(guard.observe(None,34.9))
-        self.assertIsNotNone(guard.observe(None,35))
+        self.assertIsNone(guard.observe(None,28.9))
+        self.assertIsNotNone(guard.observe(None,29))
     def test_invalid_readings_count_as_missing_and_hotspot_is_not_substituted(self):
         for value in ({'temperature_c':float('nan')},{'temperature_c':True},{'temperature_c':-1},{'hotspot_c':90}):
             guard=ThermalGuard(started=0)

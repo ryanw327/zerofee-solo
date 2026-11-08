@@ -407,8 +407,17 @@ def main():
     if args.network=='mainnet' and (not args.cookie or not args.session_pid):parser.error('Live mode requires --cookie and --session-pid')
     port=args.rpc_port if args.rpc_port is not None else (19732 if args.network=='mainnet' else 19543)
     journal_path=Path(__file__).with_name('mainnet-submission.json') if args.network=='mainnet' else Path(args.datadir)/'miner-submission.json'
-    with SubmissionJournal(journal_path) as journal:
-        execute(args,port,journal)
+    from gpu_monitor import GPUMonitor
+    from queue import Queue
+    import threading
+    stop = threading.Event()
+    monitor = GPUMonitor(Queue(), stop)
+    try:
+        monitor.start()  # Safe-reading handshake precedes node/GPU execution.
+        with SubmissionJournal(journal_path) as journal:
+            execute(args,port,journal,stop_event=stop)
+    finally:
+        monitor.close()
 
 def execute(args,port,journal,stop_event=None,on_status=None,on_progress=None,on_work=None):
     profile=getattr(args,'run_profile','test')

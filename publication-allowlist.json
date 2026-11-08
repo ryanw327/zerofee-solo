@@ -49,6 +49,7 @@
   "test_dispatch_safety.py",
   "test_gpu_identity.py",
   "test_gpu_vectors.py",
+  "test_gpu_watchdog.py",
   "test_gui.py",
   "test_gui_window.py",
   "test_helpers.py",

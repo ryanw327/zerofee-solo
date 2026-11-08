@@ -104,3 +104,25 @@ or visible-widget check; full Windows UI tests remain pending. The audit permits
 specific public recipient only in tip_support.py and its explicit audit rule, not mining
 configuration, coinbase code, or arbitrary files. No software was installed on the
 operator's PC and no funds were sent. Publication changes only the public repository.
+
+## Experimental telemetry-supervision patch
+
+This published experimental patch adds a separate heartbeat watchdog, a bounded startup wait for
+the first valid below-limit core sample, last-valid-sample missing-reading timing,
+known-hot stops before UI delivery, and nonblocking best-effort safety notification.
+The CLI entrypoint now also requires the monitor handshake and passes its cooperative
+stop event to execution. The GUI refreshes the age of its last sample on each poll.
+
+Seventeen portable synthetic watchdog/lifecycle tests and ten portable release/license
+tests passed. They cover hung reads and delivery, stale returns, startup/close/cancel,
+hot initial samples, latched concurrent stop, race recheck, sample age and CLI structure.
+No Windows GUI, actual clipboard, GPU, hardware thermal fault injection, node or full
+Windows offline suite was exercised for this revision. Existing historical reports do
+not certify it. This source patch is published for inspection and validation, not as a validated release.
+It has not been installed on the operator's PC or substituted for a running miner.
+
+The watchdog is a separate Python thread, not a separate process or hardware interlock.
+It requests cooperative stop; it cannot interrupt an in-flight driver call or guarantee
+progress if the entire process/GIL/OS is stalled. Benchmark and diagnostic retain an
+initial synchronous sensor check before monitor creation; a hang there prevents GPU
+startup but may delay cancellation. No automatic restart is added.
