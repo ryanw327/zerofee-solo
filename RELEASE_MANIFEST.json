@@ -1,7 +1,7 @@
 {
   "project": "ZeroFee Solo",
   "tagline": "Your node. Your GPU. Your whole block reward.",
-  "status": "EXPERIMENTAL_SOURCE_PREVIEW",
+  "status": "EXPERIMENTAL_SOURCE_PREVIEW_SAFETY_WARNING",
   "created_utc": "2026-11-08T02:31:44.702256+00:00",
   "files": {
     ".gitignore": "5b1e9037f3a6962b67e9907d7009b75ba5f0adac66620e77cd5340129616825a",
@@ -11,7 +11,7 @@
     "LICENSES/bech32-MIT.txt": "8d27bce87629520d0ea98e8e91a0a2793376ac8bc92af9a1c834c66e5cae5c1d",
     "LICENSES/upstream-verification.json": "878a2662940d1baff4c1ab47f47a01a8ad9fec9f58c1f40265a4a37bd83a54d3",
     "PROVENANCE.md": "19bd3479294903ee86c97be96e5ddc2f418f6fc8e6b46d400bf76405aa3a10e0",
-    "README.md": "46f374d5ace164155b2fb15e01894a440e1c664a6c3bb57550cd9fa960845b29",
+    "README.md": "32e72ad48135e4b340bcccbe31808e534b4647839fac984c9191ccd380f74b0d",
     "RELEASE_STATUS.md": "2f6bb64c890e9658e59fb2f219726e140ffd2219ba2c8757ba2dd73b6d933613",
     "THIRD_PARTY_NOTICES.md": "cc33f5001369450d4eec7e88e05ef3e6cf537977e3e9de48ec28b7c996ec8e25",
     "address.py": "2e7e6ea4f8c4f24836ba5eaa748cb0bda430ea26ab222517245dbd129f052f01",
