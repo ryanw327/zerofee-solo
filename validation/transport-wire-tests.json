@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "tests": 16,
+  "failures": 0,
+  "errors": 0,
+  "blocked_side_effect_attempts": [],
+  "network_scope": "Ephemeral synthetic IPv4 loopback only",
+  "real_core_used": false,
+  "gpu_executed": false,
+  "test_modules": [
+    "test_rpc_wire",
+    "test_local_rpc"
+  ]
+}

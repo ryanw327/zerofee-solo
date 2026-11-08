@@ -1,0 +1,14 @@
+{
+  "core": {
+    "blob_sha": "89960cbf2f221a29852ed162b25bda2afc0b2dd6",
+    "url": "https://github.com/bitcoin/bitcoin/blob/master/COPYING",
+    "notice": "Exact upstream COPYING bytes",
+    "canonical_notice_sha256": "b028769f3852a9368ab10bd754ff01ebb741f84a2fa658c9aff82a631bc6ecfc"
+  },
+  "bech32": {
+    "blob_sha": "b068de779898bc08d8f248b8274ef35c0e30dafb",
+    "url": "https://github.com/sipa/bech32/blob/master/ref/python/segwit_addr.py",
+    "notice": "Exact copyright/license header with Python comment prefix removed",
+    "canonical_notice_sha256": "8d27bce87629520d0ea98e8e91a0a2793376ac8bc92af9a1c834c66e5cae5c1d"
+  }
+}

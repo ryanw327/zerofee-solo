@@ -1,0 +1,2 @@
+# No third-party Python packages are required.
+# CPython with tkinter, NVIDIA driver/CUDA NVRTC, and Bitcoin Core are installed separately.

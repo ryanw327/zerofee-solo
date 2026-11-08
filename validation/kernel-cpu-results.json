@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "modes": {
+    "optimized": {
+      "batch_cases": 156,
+      "cpu_digest_comparisons": 10476,
+      "target_flag_comparisons": 10476,
+      "compact_capacity_cases": 468,
+      "independent_target_boundary_cases": 1280
+    },
+    "fallback": {
+      "batch_cases": 156,
+      "cpu_digest_comparisons": 10476,
+      "target_flag_comparisons": 10476,
+      "compact_capacity_cases": 468,
+      "independent_target_boundary_cases": 1280
+    },
+    "byte_permutation": {
+      "batch_cases": 156,
+      "cpu_digest_comparisons": 10476,
+      "target_flag_comparisons": 10476,
+      "compact_capacity_cases": 468,
+      "independent_target_boundary_cases": 1280
+    }
+  },
+  "cuda_source_sha256": "e4f0dda2716c40a960cd38ba308b95735f55f1482403c9e7db535466b89157c3",
+  "execution": "CPU native shim over actual CUDA source; sequential atomic emulation",
+  "gpu_executed": false,
+  "core_started": false,
+  "hardware_validated": false
+}
