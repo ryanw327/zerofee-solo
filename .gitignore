@@ -37,3 +37,26 @@ bitcoin.conf
 .venv/
 dist/
 build/
+
+# Local coding-agent approvals and transcripts can retain literal credentials.
+# Keep these exclusions in the repo so they travel between machines. Do not
+# blanket-ignore agent folders: reviewed shared settings/instructions may belong
+# in source. Ignore rules do not remove tracked files or erase Git history;
+# rotate any exposed credential first, then clean up the affected history.
+**/.claude/settings.local.json
+**/.claude/projects/
+**/.codex/auth.json
+**/.codex/sessions/
+**/.codex/history.jsonl
+**/.gemini/oauth_creds.json
+**/.gemini/tmp/
+**/.specstory/
+.aider.chat.history.md
+.aider.input.history
+
+# Local credential bundles and common private SSH keys (not public keys).
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+secrets.local.*

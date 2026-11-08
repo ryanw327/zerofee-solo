@@ -4,7 +4,7 @@
   "status": "EXPERIMENTAL_SOURCE_PREVIEW_SAFETY_WARNING",
   "created_utc": "2026-11-08T02:31:44.702256+00:00",
   "files": {
-    ".gitignore": "5b1e9037f3a6962b67e9907d7009b75ba5f0adac66620e77cd5340129616825a",
+    ".gitignore": "1dea65ab166567fc8c68edd0efec2d87a77bbd72923b2a95a04ab90736d8b482",
     "LICENSE": "1ef9555584e87758c574efc3afdc6249427fcacaef4829fd368a660c6535fdf6",
     "LICENSES/BIPs-BSD-2-Clause.txt": "dfe7de6b8eb645a53e0af6a07b29226b0543050e7bb8fe062fbc7ac4070889b6",
     "LICENSES/Bitcoin-Core-MIT.txt": "30554214b164b16f736ceb2adbcd36f1a440fef5dab8ad14914976a05f6c4506",
