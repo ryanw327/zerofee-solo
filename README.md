@@ -1,5 +1,7 @@
 # ZeroFee Solo
 
+> **Known safety issue under repair: do not use this preview for mining yet.** Source review found that a stalled telemetry thread can prevent its own missing-reading timeout from running, and startup does not wait for the first valid temperature reading. These are identified control-flow gaps, not a claim of an observed hardware failure. An independent heartbeat watchdog and startup handshake are being developed and tested; no fixed release is available yet.
+
 **Your node. Your GPU. Your whole block reward.**
 
 Experimental Windows solo Bitcoin mining software for one NVIDIA GPU and your own
